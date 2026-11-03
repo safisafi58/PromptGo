@@ -1,0 +1,34 @@
+name: Build PromptGo Admin APK
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: test -s pubspec.yaml && test -s lib/admin_main.dart
+      - run: flutter create --platforms=android --org com.promptgo --project-name prompt_go --no-pub .
+      - run: flutter pub get
+      - run: dart run flutter_launcher_icons
+      - name: Set Admin app label
+        run: sed -i 's/android:label="prompt_go"/android:label="PromptGo Admin"/' android/app/src/main/AndroidManifest.xml
+      - run: flutter analyze lib/admin_main.dart --no-fatal-infos
+      - run: flutter build apk --release -t lib/admin_main.dart --build-name=1.0.0 --build-number=1
+      - run: test -s build/app/outputs/flutter-apk/app-release.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PromptGo-Admin-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
