@@ -364,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen> {
     child: SafeArea(top: false, child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 9),
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-        navItem(Icons.grid_view_rounded, 'Discover', 0),
+        navItem(Icons.home_rounded, 'Home', 0),
         navItem(Icons.favorite_rounded, 'Favorites', 1),
       ]),
     )),
