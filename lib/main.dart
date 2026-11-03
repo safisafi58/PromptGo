@@ -111,9 +111,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) => Scaffold(
     body: Container(
-      decoration: const BoxDecoration(gradient: RadialGradient(
-        center: Alignment(0, -.25), radius: 1.1,
-        colors: [Color(0xFF2A2050), bg, bg],
+      decoration: BoxDecoration(gradient: RadialGradient(
+        center: const Alignment(0, -.25), radius: 1.1,
+        colors: [const Color(0xFF2A2050), bg, bg],
       )),
       child: Center(child: FadeTransition(
         opacity: controller,
