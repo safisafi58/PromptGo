@@ -63,18 +63,20 @@ jobs:
         run: flutter analyze --no-fatal-infos
 
       - name: Build release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols --tree-shake-icons
 
       - name: Verify APK output
         run: |
-          APK="build/app/outputs/flutter-apk/app-release.apk"
-          test -s "$APK"
-          ls -lh "$APK"
+          APK_DIR="build/app/outputs/flutter-apk"
+          test -s "$APK_DIR/app-armeabi-v7a-release.apk"
+          test -s "$APK_DIR/app-arm64-v8a-release.apk"
+          test -s "$APK_DIR/app-x86_64-release.apk"
+          ls -lh "$APK_DIR"/*.apk
 
       - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:
           name: PromptGo-User-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-*-release.apk
           if-no-files-found: error
           retention-days: 14
