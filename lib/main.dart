@@ -54,7 +54,8 @@ class _PromptGoAppState extends State<PromptGoApp> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('promptgo_language', code);
     if (mounted) setState(() {});
-  }\n  Future<void> _toggleTheme() async {
+  }
+  Future<void> _toggleTheme() async {
     setState(() => appDarkMode = !appDarkMode);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('promptgo_dark_mode', appDarkMode);
@@ -492,7 +493,8 @@ class _HomeScreenState extends State<HomeScreen> {
       drawerItem(Icons.settings_rounded, tr('settings'), () {
         Navigator.pop(context);
         Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen(onToggleTheme: widget.onToggleTheme, onSelectLanguage: widget.onSelectLanguage)));
-      }),\n      SwitchListTile(
+      }),
+      SwitchListTile(
         secondary: Icon(appDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded, color: violet),
         title: Text(appDarkMode ? tr('dark') : tr('light'), style: TextStyle(color: foreground, fontSize: 13, fontWeight: FontWeight.w600)),
         subtitle: Text(tr('switchAppearance'), style: TextStyle(color: mutedText, fontSize: 11)),
