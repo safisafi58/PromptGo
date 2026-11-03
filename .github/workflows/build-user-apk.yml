@@ -1,6 +1,9 @@
 name: Build PromptGo User APK
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -12,9 +15,9 @@ concurrency:
 
 jobs:
   build:
-    name: Build Android release APK
+    name: Build and verify Android APKs
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 50
 
     steps:
       - name: Checkout repository
@@ -25,6 +28,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -32,14 +36,15 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Check project files
+      - name: Check required project files
         run: |
           test -s pubspec.yaml
           test -s lib/main.dart
           test -s lib/20261026_230726.png
-          echo "Required Flutter project and launcher icon files are present."
+          test -s test/widget_test.dart
+          echo "All required PromptGo User source files are present."
 
-      - name: Generate Android platform files
+      - name: Generate Android platform project
         run: |
           flutter create \
             --platforms=android \
@@ -47,25 +52,33 @@ jobs:
             --project-name prompt_go \
             --no-pub .
 
-      - name: Install Flutter dependencies
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: Generate Android launcher icons
+      - name: Generate launcher icons
         run: dart run flutter_launcher_icons
 
-      - name: Verify generated launcher icons
+      - name: Verify launcher icon output
         run: |
-          test -d android/app/src/main/res/mipmap-hdpi
-          test -f android/app/src/main/res/mipmap-hdpi/ic_launcher.png
-          echo "Android launcher icons generated successfully."
+          test -s android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          echo "Launcher icons generated."
 
-      - name: Analyze Flutter project
-        run: flutter analyze lib/main.dart --no-fatal-infos
+      - name: Analyze Dart source
+        run: flutter analyze --no-fatal-infos
 
-      - name: Build release APK
-        run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols --tree-shake-icons
+      - name: Run widget tests
+        run: flutter test
 
-      - name: Verify APK output
+      - name: Build optimized release APKs
+        run: |
+          flutter build apk \
+            --release \
+            --split-per-abi \
+            --obfuscate \
+            --split-debug-info=build/symbols \
+            --tree-shake-icons
+
+      - name: Verify all APK outputs
         run: |
           APK_DIR="build/app/outputs/flutter-apk"
           test -s "$APK_DIR/app-armeabi-v7a-release.apk"
@@ -73,7 +86,7 @@ jobs:
           test -s "$APK_DIR/app-x86_64-release.apk"
           ls -lh "$APK_DIR"/*.apk
 
-      - name: Upload release APK
+      - name: Upload release APKs
         uses: actions/upload-artifact@v4
         with:
           name: PromptGo-User-APK
