@@ -286,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Row(children: [
         Text(categoryName(), style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: foreground)),
         const Spacer(),
-        Text(list.length.toString() + ' prompts', style: const TextStyle(color: Colors.white38, fontSize: 11)),
+        Text(list.length.toString() + ' prompts', style: TextStyle(color: faintText, fontSize: 11)),
       ])),
       const SizedBox(height: 14),
       if (list.isEmpty) emptyState(search.isNotEmpty ? 'No matching prompts' : 'No prompts yet',
@@ -375,8 +375,8 @@ class _HomeScreenState extends State<HomeScreen> {
       selected: active, label: Text(label),
       onSelected: (_) => setState(() => category = active ? null : id),
       selectedColor: violet, backgroundColor: panel,
-      side: BorderSide(color: active ? violet : Colors.white10),
-      labelStyle: TextStyle(color: active ? Colors.white : Colors.white70, fontSize: 12, fontWeight: FontWeight.w600),
+      side: BorderSide(color: active ? violet : hairline),
+      labelStyle: TextStyle(color: active ? Colors.white : secondaryText, fontSize: 12, fontWeight: FontWeight.w600),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
     ));
   }
@@ -425,7 +425,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget bottomBar() => Container(
     decoration: BoxDecoration(color: bg,
-      border: Border(top: BorderSide(color: Colors.white.withOpacity(.06)))),
+      border: Border(top: BorderSide(color: hairline))),
     child: SafeArea(top: false, child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 9),
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
@@ -441,9 +441,9 @@ class _HomeScreenState extends State<HomeScreen> {
       borderRadius: BorderRadius.circular(14),
       child: Padding(padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 5),
         child: Row(children: [
-          Icon(icon, size: 19, color: active ? cyan : Colors.white38),
+          Icon(icon, size: 19, color: active ? cyan : faintText),
           const SizedBox(width: 8),
-          Text(label, style: TextStyle(color: active ? Colors.white : Colors.white38,
+          Text(label, style: TextStyle(color: active ? foreground : faintText,
             fontSize: 12, fontWeight: FontWeight.w700)),
         ]),
       ),
@@ -463,7 +463,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text('Ideas into incredible creations', style: TextStyle(color: mutedText, fontSize: 10)),
         ]),
       ])),
-      const Divider(color: Colors.white10),
+      Divider(color: hairline),
       drawerItem(Icons.home_rounded, 'Home', () { setState(() => tab = 0); Navigator.pop(context); }),
       drawerItem(Icons.favorite_rounded, 'Favorites', () { setState(() => tab = 1); Navigator.pop(context); }),
       drawerItem(Icons.category_rounded, 'Categories', () { Navigator.pop(context); setState(() => tab = 0); }),
@@ -487,8 +487,8 @@ class _HomeScreenState extends State<HomeScreen> {
   );
 
   Widget drawerItem(IconData icon, String title, VoidCallback onTap) => ListTile(
-    leading: Icon(icon, color: Colors.white70, size: 21),
-    title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+    leading: Icon(icon, color: secondaryText, size: 21),
+    title: Text(title, style: TextStyle(color: foreground, fontSize: 13, fontWeight: FontWeight.w600)),
     onTap: onTap,
   );
 
@@ -501,7 +501,7 @@ class _HomeScreenState extends State<HomeScreen> {
       const SizedBox(height: 16),
       Text(title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: foreground)),
       const SizedBox(height: 7),
-      Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+      Text(subtitle, textAlign: TextAlign.center, style: TextStyle(color: mutedText, fontSize: 12)),
     ]),
   );
 
@@ -611,7 +611,7 @@ class _PromptDetailScreenState extends State<PromptDetailScreen> {
           const SizedBox(width: 8),
           Text('YOUR PROMPT', style: const TextStyle(color: cyan, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.5)),
           const Spacer(),
-          if (!complete) const Text('Writing...', style: TextStyle(color: Colors.white38, fontSize: 10)),
+          if (!complete) Text('Writing...', style: TextStyle(color: faintText, fontSize: 10)),
         ]),
         const SizedBox(height: 11),
         Container(padding: const EdgeInsets.all(17), decoration: BoxDecoration(
@@ -632,7 +632,7 @@ class _PromptDetailScreenState extends State<PromptDetailScreen> {
               )),
               const SizedBox(height: 10),
               TextButton.icon(onPressed: sharePrompt, icon: const Icon(Icons.share_outlined, size: 17),
-                label: const Text('Share prompt'), style: TextButton.styleFrom(foregroundColor: Colors.white70)),
+                label: const Text('Share prompt'), style: TextButton.styleFrom(foregroundColor: secondaryText)),
             ])
           : const SizedBox(key: ValueKey('typing'), height: 54,
               child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: violet)))),
