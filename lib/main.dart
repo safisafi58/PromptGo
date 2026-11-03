@@ -513,9 +513,9 @@ class _HomeScreenState extends State<HomeScreen> {
   );
 
   String categoryName() {
-    if (category == null) return 'All Prompts';
+    if (category == null) return tr('allPrompts');
     for (final c in categories) { if (c.id == category) return c.name; }
-    return 'Prompts';
+    return tr('allPrompts');
   }
 
   Widget image(String url) {
