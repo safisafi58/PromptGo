@@ -492,7 +492,7 @@ class _HomeScreenState extends State<HomeScreen> {
       drawerItem(Icons.category_rounded, tr('categories'), () { Navigator.pop(context); setState(() => tab = 0); }),
       drawerItem(Icons.settings_rounded, tr('settings'), () {
         Navigator.pop(context);
-        Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen(onToggleTheme: widget.onToggleTheme, onSelectLanguage: widget.onSelectLanguage)));
+        Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen(onToggleTheme: widget.onToggleTheme, onSelectLanguage: widget.onSelectLanguage))).then((_) { if (mounted) setState(() {}); });
       }),
       SwitchListTile(
         secondary: Icon(appDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded, color: violet),
@@ -508,7 +508,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.pop(context);
         Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutPromptGoScreen()));
       }),
-      const Padding(padding: EdgeInsets.fromLTRB(22, 12, 22, 22),
+      Padding(padding: const EdgeInsets.fromLTRB(22, 12, 22, 22),
         child: Text('VERSION 1.0.0', style: TextStyle(color: faintText, fontSize: 10, letterSpacing: 1.5))),
     ])),
   );
