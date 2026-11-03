@@ -300,6 +300,42 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   );
 
+  Widget latestPrompts(List<Prompt> items) => SizedBox(
+    height: 166,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      itemCount: items.length,
+      separatorBuilder: (_, __) => const SizedBox(width: 12),
+      itemBuilder: (ctx, i) {
+        final p = items[i];
+        return SizedBox(
+          width: 132,
+          child: GestureDetector(
+            onTap: () => openPrompt(p),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(17),
+              child: Stack(fit: StackFit.expand, children: [
+                image(p.imageUrl),
+                const DecoratedBox(decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Color(0xE8000000)],
+                  ),
+                )),
+                Positioned(left: 10, right: 9, bottom: 10,
+                  child: Text(p.title, maxLines: 2, overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800))),
+                Positioned(top: 9, left: 9, child: pill('NEW', cyan)),
+              ]),
+            ),
+          ),
+        );
+      },
+    ),
+  );
+
   Widget categoryChips() => SizedBox(height: 42, child: ListView(
     scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 20),
     children: [
