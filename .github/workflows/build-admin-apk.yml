@@ -1,5 +1,8 @@
 name: Build PromptGo Admin APK
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 permissions:
   contents: read
@@ -18,7 +21,7 @@ jobs:
           channel: stable
           cache: true
       - run: test -s pubspec.yaml && test -s lib/admin_main.dart
-      - run: flutter create --platforms=android --org com.promptgo --project-name prompt_go --no-pub .
+      - run: flutter create --platforms=android --org com.admin --project-name promptgo --no-pub .
       - run: flutter pub get
       - run: dart run flutter_launcher_icons
       - name: Set Admin app label
