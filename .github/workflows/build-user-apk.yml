@@ -47,8 +47,8 @@ jobs:
         run: |
           flutter create \
             --platforms=android \
-            --org com.admin \
-            --project-name promptgo \
+            --org com.promptgo \
+            --project-name prompt_go \
             --no-pub .
 
       - name: Install dependencies
