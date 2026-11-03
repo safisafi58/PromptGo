@@ -166,7 +166,7 @@ class _AdminPageState extends State<AdminPage>{
        }
        try{
          await db.functions.invoke('promptgo-admin',headers:{'x-admin-pin':widget.pin},body:{'action':'change_pin','new_pin':next.text.trim()});
-         if(mounted){Navigator.pop(ctx);ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Administrator code updated')));}
+         if(mounted){final saved=next.text.trim();Navigator.pop(ctx);Navigator.pushReplacement(context,MaterialPageRoute(builder:(_)=>AdminPage(pin:saved)));}
        }catch(_){if(mounted)ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Could not change administrator code')));}
      },child:const Text('Save'))]
    ));
