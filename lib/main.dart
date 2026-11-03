@@ -247,8 +247,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final featured = prompts.where((p) => p.featured).take(8).toList();
     return ListView(physics: const AlwaysScrollableScrollPhysics(), padding: const EdgeInsets.only(bottom: 25), children: [
       const SizedBox(height: 5),
-      heading('Discover', 'Explore ideas. Create more.'),
-      if (featured.isNotEmpty) ...[const SizedBox(height: 18), featuredSlider(featured)],
+      if (prompts.isNotEmpty) ...[
+        heading('Latest Prompts', 'The 10 newest creative prompts'),
+        const SizedBox(height: 14),
+        latestPrompts(prompts.take(10).toList()),
+      ],
+      if (featured.isNotEmpty) ...[const SizedBox(height: 24), featuredSlider(featured)],
       const SizedBox(height: 27),
       heading('Categories', 'Find prompts by interest'),
       const SizedBox(height: 13),
