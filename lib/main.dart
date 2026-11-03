@@ -1,15 +1,19 @@
 import 'dart:async';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-const bg = Color(0xFF080A12);
-const panel = Color(0xFF141A29);
-const panel2 = Color(0xFF1D2538);
+bool appDarkMode = true;
+Color get bg => appDarkMode ? const Color(0xFF080A12) : const Color(0xFFF5F7FC);
+Color get panel => appDarkMode ? const Color(0xFF141A29) : Colors.white;
+Color get panel2 => appDarkMode ? const Color(0xFF1D2538) : const Color(0xFFE9EDF5);
+Color get foreground => appDarkMode ? Colors.white : const Color(0xFF182033);
+Color get secondaryText => appDarkMode ? Colors.white70 : const Color(0xFF586174);
+Color get mutedText => appDarkMode ? Colors.white54 : const Color(0xFF657086);
+Color get faintText => appDarkMode ? Colors.white38 : const Color(0xFF8992A4);
+Color get hairline => appDarkMode ? Colors.white10 : const Color(0x1F182033);
 const violet = Color(0xFF8B5CF6);
 const cyan = Color(0xFF39D5E8);
 const supabaseUrl = 'https://evaammherpizsntcbzbf.supabase.co';
@@ -22,25 +26,44 @@ Future<void> main() async {
   runApp(const PromptGoApp());
 }
 
-class PromptGoApp extends StatelessWidget {
+class PromptGoApp extends StatefulWidget {
   const PromptGoApp({super.key});
   @override
+  State<PromptGoApp> createState() => _PromptGoAppState();
+}
+class _PromptGoAppState extends State<PromptGoApp> {
+  @override
+  void initState() {
+    super.initState();
+    _loadTheme();
+  }
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) setState(() => appDarkMode = prefs.getBool('promptgo_dark_mode') ?? true);
+  }
+  Future<void> _toggleTheme() async {
+    setState(() => appDarkMode = !appDarkMode);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('promptgo_dark_mode', appDarkMode);
+  }
+  @override
   Widget build(BuildContext context) {
+    final brightness = appDarkMode ? Brightness.dark : Brightness.light;
     final theme = ThemeData(
-      brightness: Brightness.dark,
+      brightness: brightness,
       scaffoldBackgroundColor: bg,
-      colorScheme: const ColorScheme.dark(primary: violet, secondary: cyan, surface: panel),
+      colorScheme: ColorScheme.fromSeed(seedColor: violet, brightness: brightness,
+        primary: violet, secondary: cyan, surface: panel),
       useMaterial3: true,
+      appBarTheme: AppBarTheme(backgroundColor: bg, foregroundColor: foreground, elevation: 0),
+      drawerTheme: DrawerThemeData(backgroundColor: bg),
+      snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
     );
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'PromptGo',
-      theme: theme.copyWith(
-        textTheme: GoogleFonts.interTextTheme(theme.textTheme),
-        appBarTheme: const AppBarTheme(backgroundColor: bg, elevation: 0),
-        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
-      ),
-      home: const SplashScreen(),
+      theme: theme,
+      home: SplashScreen(onToggleTheme: _toggleTheme),
     );
   }
 }
@@ -65,7 +88,8 @@ class PromptCategory {
 }
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final Future<void> Function() onToggleTheme;
+  const SplashScreen({super.key, required this.onToggleTheme});
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
@@ -77,7 +101,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     super.initState();
     Future.delayed(const Duration(milliseconds: 2200), () {
       if (mounted) Navigator.pushReplacement(context, PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const HomeScreen(),
+        pageBuilder: (_, __, ___) => HomeScreen(onToggleTheme: widget.onToggleTheme),
         transitionsBuilder: (_, a, __, child) => FadeTransition(opacity: a, child: child),
       ));
     });
@@ -102,14 +126,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 gradient: const LinearGradient(colors: [violet, Color(0xFF547CFF), cyan]),
                 boxShadow: [BoxShadow(color: violet.withOpacity(.4), blurRadius: 40)],
               ),
-              child: const Icon(Icons.auto_awesome_rounded, size: 56, color: Colors.white),
+              child: const Icon(Icons.auto_awesome_rounded, size: 56, color: foreground),
             ),
             const SizedBox(height: 24),
-            Text('PromptGo', style: GoogleFonts.inter(fontSize: 35, fontWeight: FontWeight.w900, letterSpacing: -1)),
+            Text('PromptGo', style: TextStyle(fontSize: 35, fontWeight: FontWeight.w900, letterSpacing: -1, color: foreground)),
             const SizedBox(height: 8),
-            const Text('Ideas into incredible creations', style: TextStyle(color: Colors.white70, fontSize: 13)),
+            const Text('Ideas into incredible creations', style: TextStyle(color: secondaryText, fontSize: 13)),
             const SizedBox(height: 42),
-            const Text('VERSION 1.0.0', style: TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 2)),
+            const Text('VERSION 1.0.0', style: TextStyle(color: faintText, fontSize: 10, letterSpacing: 2)),
           ]),
         ),
       )),
@@ -118,7 +142,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final Future<void> Function() onToggleTheme;
+  const HomeScreen({super.key, required this.onToggleTheme});
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -205,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
         gradient: const LinearGradient(colors: [violet, cyan]),
       ), child: const Icon(Icons.auto_awesome_rounded, size: 22)),
       const SizedBox(width: 10),
-      Text('PromptGo', style: GoogleFonts.inter(fontSize: 21, fontWeight: FontWeight.w900)),
+      Text('PromptGo', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900, color: foreground)),
       const Spacer(),
       if (searchOpen) Expanded(child: Padding(
         padding: const EdgeInsets.only(left: 10),
@@ -236,9 +261,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget heading(String title, String sub) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 20),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(title, style: GoogleFonts.inter(fontSize: 25, fontWeight: FontWeight.w900, letterSpacing: -.8)),
+      Text(title, style: TextStyle(fontSize: 25, fontWeight: FontWeight.w900, letterSpacing: -.8, color: foreground)),
       const SizedBox(height: 5),
-      Text(sub, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+      Text(sub, style: const TextStyle(color: mutedText, fontSize: 12)),
     ]),
   );
 
@@ -259,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
       categoryChips(),
       const SizedBox(height: 27),
       Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Row(children: [
-        Text(categoryName(), style: GoogleFonts.inter(fontSize: 19, fontWeight: FontWeight.w800)),
+        Text(categoryName(), style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: foreground)),
         const Spacer(),
         Text(list.length.toString() + ' prompts', style: const TextStyle(color: Colors.white38, fontSize: 11)),
       ])),
@@ -288,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Positioned(left: 18, right: 18, bottom: 17, child: Column(
               crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(p.title, maxLines: 2, overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w800)),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
                 const SizedBox(height: 7),
                 const Row(children: [Text('Explore prompt', style: TextStyle(fontSize: 11, color: Colors.white70)),
                   SizedBox(width: 6), Icon(Icons.arrow_forward_rounded, size: 14, color: cyan)]),
@@ -326,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 )),
                 Positioned(left: 10, right: 9, bottom: 10,
                   child: Text(p.title, maxLines: 2, overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800))),
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white))),
                 Positioned(top: 9, left: 9, child: pill('NEW', cyan)),
               ]),
             ),
@@ -368,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return GestureDetector(onTap: () => openPrompt(p), child: Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(color: panel, borderRadius: BorderRadius.circular(19),
-            border: Border.all(color: Colors.white.withOpacity(.06))),
+            border: Border.all(color: hairline)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(child: Stack(fit: StackFit.expand, children: [
               image(p.imageUrl),
@@ -381,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ])),
             Padding(padding: const EdgeInsets.fromLTRB(11, 10, 11, 12), child: Text(p.title,
               maxLines: 2, overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, height: 1.3))),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, height: 1.3, color: foreground))),
           ]),
         ));
       },
@@ -399,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
   );
 
   Widget bottomBar() => Container(
-    decoration: BoxDecoration(color: const Color(0xFF0D111D),
+    decoration: BoxDecoration(color: bg,
       border: Border(top: BorderSide(color: Colors.white.withOpacity(.06)))),
     child: SafeArea(top: false, child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 9),
@@ -426,7 +451,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildDrawer() => Drawer(
-    backgroundColor: const Color(0xFF101524),
+    backgroundColor: bg,
     child: SafeArea(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Padding(padding: const EdgeInsets.fromLTRB(22, 28, 22, 26), child: Row(children: [
         Container(width: 48, height: 48, decoration: BoxDecoration(
@@ -434,23 +459,30 @@ class _HomeScreenState extends State<HomeScreen> {
           child: const Icon(Icons.auto_awesome_rounded, size: 27)),
         const SizedBox(width: 13),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('PromptGo', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w800)),
-          const Text('Ideas into incredible creations', style: TextStyle(color: Colors.white54, fontSize: 10)),
+          Text('PromptGo', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: foreground)),
+          const Text('Ideas into incredible creations', style: TextStyle(color: mutedText, fontSize: 10)),
         ]),
       ])),
       const Divider(color: Colors.white10),
       drawerItem(Icons.home_rounded, 'Home', () { setState(() => tab = 0); Navigator.pop(context); }),
       drawerItem(Icons.favorite_rounded, 'Favorites', () { setState(() => tab = 1); Navigator.pop(context); }),
       drawerItem(Icons.category_rounded, 'Categories', () { Navigator.pop(context); setState(() => tab = 0); }),
+      SwitchListTile(
+        secondary: Icon(appDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded, color: violet),
+        title: Text(appDarkMode ? 'Dark theme' : 'Light theme', style: TextStyle(color: foreground, fontSize: 13, fontWeight: FontWeight.w600)),
+        subtitle: Text('Switch app appearance', style: TextStyle(color: mutedText, fontSize: 11)),
+        value: appDarkMode,
+        activeColor: violet,
+        onChanged: (_) => widget.onToggleTheme(),
+      ),
       const Spacer(),
-      const Divider(color: Colors.white10),
+      Divider(color: hairline),
       drawerItem(Icons.info_outline_rounded, 'About PromptGo', () {
         Navigator.pop(context);
-        showAboutDialog(context: context, applicationName: 'PromptGo',
-          applicationVersion: '1.0.0', applicationLegalese: 'Ideas into incredible creations.');
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutPromptGoScreen()));
       }),
       const Padding(padding: EdgeInsets.fromLTRB(22, 12, 22, 22),
-        child: Text('VERSION 1.0.0', style: TextStyle(color: Colors.white30, fontSize: 10, letterSpacing: 1.5))),
+        child: Text('VERSION 1.0.0', style: TextStyle(color: faintText, fontSize: 10, letterSpacing: 1.5))),
     ])),
   );
 
@@ -467,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
         color: violet.withOpacity(.13), borderRadius: BorderRadius.circular(23)),
         child: const Icon(Icons.auto_awesome_rounded, color: violet, size: 32)),
       const SizedBox(height: 16),
-      Text(title, style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w800)),
+      Text(title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: foreground)),
       const SizedBox(height: 7),
       Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54, fontSize: 12)),
     ]),
@@ -481,12 +513,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget image(String url) {
     if (url.trim().isEmpty) return Container(color: panel2,
-      child: const Center(child: Icon(Icons.image_not_supported_outlined, color: Colors.white30, size: 35)));
-    return CachedNetworkImage(imageUrl: url, fit: BoxFit.cover,
-      placeholder: (_, __) => Container(color: panel2,
-        child: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: violet))),
-      errorWidget: (_, __, ___) => Container(color: panel2,
-        child: const Center(child: Icon(Icons.broken_image_outlined, color: Colors.white38, size: 32))),
+      child: Center(child: Icon(Icons.image_not_supported_outlined, color: mutedText, size: 35)));
+    return Image.network(url, fit: BoxFit.cover,
+      loadingBuilder: (context, child, progress) => progress == null ? child :
+        Container(color: panel2, child: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: violet))),
+      errorBuilder: (_, __, ___) => Container(color: panel2,
+        child: Center(child: Icon(Icons.broken_image_outlined, color: mutedText, size: 32))),
     );
   }
 
@@ -552,7 +584,7 @@ class _PromptDetailScreenState extends State<PromptDetailScreen> {
     final p = widget.prompt;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Prompt Details', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700)),
+        title: Text('Prompt Details', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: foreground)),
         actions: [
           IconButton(onPressed: () { setState(() => favorite = !favorite); widget.onFavorite(); },
             icon: Icon(favorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
@@ -564,25 +596,27 @@ class _PromptDetailScreenState extends State<PromptDetailScreen> {
       body: ListView(padding: const EdgeInsets.fromLTRB(18, 8, 18, 30), children: [
         ClipRRect(borderRadius: BorderRadius.circular(23), child: AspectRatio(aspectRatio: 1.12,
           child: p.imageUrl.isEmpty ? Container(color: panel2, child: const Icon(Icons.image_outlined, size: 48))
-          : CachedNetworkImage(imageUrl: p.imageUrl, fit: BoxFit.cover,
-            placeholder: (_, __) => Container(color: panel2, child: const Center(child: CircularProgressIndicator(color: violet))),
-            errorWidget: (_, __, ___) => Container(color: panel2, child: const Icon(Icons.broken_image_outlined, size: 42, color: Colors.white38)),
+          : Image.network(p.imageUrl, fit: BoxFit.cover,
+            loadingBuilder: (_, child, progress) => progress == null ? child :
+              Container(color: panel2, child: const Center(child: CircularProgressIndicator(color: violet))),
+            errorBuilder: (_, __, ___) => Container(color: panel2,
+              child: Center(child: Icon(Icons.broken_image_outlined, size: 42, color: mutedText))),
           ),
         )),
         const SizedBox(height: 22),
-        Text(p.title, style: GoogleFonts.inter(fontSize: 23, fontWeight: FontWeight.w800, letterSpacing: -.5)),
+        Text(p.title, style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800, letterSpacing: -.5, color: foreground)),
         const SizedBox(height: 18),
         Row(children: [
           const Icon(Icons.auto_awesome_rounded, color: cyan, size: 17),
           const SizedBox(width: 8),
-          Text('YOUR PROMPT', style: GoogleFonts.inter(color: cyan, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.5)),
+          Text('YOUR PROMPT', style: const TextStyle(color: cyan, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.5)),
           const Spacer(),
           if (!complete) const Text('Writing...', style: TextStyle(color: Colors.white38, fontSize: 10)),
         ]),
         const SizedBox(height: 11),
         Container(padding: const EdgeInsets.all(17), decoration: BoxDecoration(
           color: panel, borderRadius: BorderRadius.circular(18), border: Border.all(color: violet.withOpacity(.22))),
-          child: SelectableText(shown, style: GoogleFonts.inter(fontSize: 13, height: 1.75, color: Colors.white.withOpacity(.9))),
+          child: SelectableText(shown, style: TextStyle(fontSize: 13, height: 1.75, color: foreground.withOpacity(.9))),
         ),
         const SizedBox(height: 18),
         AnimatedSwitcher(duration: const Duration(milliseconds: 350), child: complete
@@ -606,4 +640,43 @@ class _PromptDetailScreenState extends State<PromptDetailScreen> {
       ]),
     );
   }
+}
+
+
+class AboutPromptGoScreen extends StatelessWidget {
+  const AboutPromptGoScreen({super.key});
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text('About PromptGo', style: TextStyle(color: foreground, fontWeight: FontWeight.w700))),
+    body: ListView(padding: const EdgeInsets.all(22), children: [
+      const SizedBox(height: 18),
+      Center(child: Container(width: 86, height: 86,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(25),
+          gradient: const LinearGradient(colors: [violet, Color(0xFF547CFF), cyan])),
+        child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 44))),
+      const SizedBox(height: 18),
+      Text('PromptGo', textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: foreground)),
+      const SizedBox(height: 7),
+      Text('Ideas into incredible creations', textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 13, color: mutedText)),
+      const SizedBox(height: 26),
+      Container(padding: const EdgeInsets.all(17),
+        decoration: BoxDecoration(color: panel, borderRadius: BorderRadius.circular(18)),
+        child: Text('PromptGo is an online prompt library that helps you discover creative ideas, explore categories, save your favorite prompts, and copy or share prompts for your projects.',
+          style: TextStyle(color: foreground, height: 1.6, fontSize: 13))),
+      const SizedBox(height: 18),
+      ListTile(leading: Icon(Icons.cloud_done_outlined, color: violet),
+        title: Text('Online library', style: TextStyle(color: foreground)),
+        subtitle: Text('Prompts and categories sync from the internet.', style: TextStyle(color: mutedText))),
+      ListTile(leading: Icon(Icons.favorite_border_rounded, color: violet),
+        title: Text('Favorites', style: TextStyle(color: foreground)),
+        subtitle: Text('Save prompts on this device.', style: TextStyle(color: mutedText))),
+      ListTile(leading: Icon(Icons.copy_rounded, color: violet),
+        title: Text('Copy and share', style: TextStyle(color: foreground)),
+        subtitle: Text('Use prompts in your favorite creative tools.', style: TextStyle(color: mutedText))),
+      const SizedBox(height: 20),
+      Center(child: Text('Version 1.0.0', style: TextStyle(color: mutedText, fontSize: 11))),
+    ]),
+  );
 }
