@@ -126,14 +126,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 gradient: const LinearGradient(colors: [violet, Color(0xFF547CFF), cyan]),
                 boxShadow: [BoxShadow(color: violet.withOpacity(.4), blurRadius: 40)],
               ),
-              child: const Icon(Icons.auto_awesome_rounded, size: 56, color: foreground),
+              child: const Icon(Icons.auto_awesome_rounded, size: 56, color: Colors.white),
             ),
             const SizedBox(height: 24),
             Text('PromptGo', style: TextStyle(fontSize: 35, fontWeight: FontWeight.w900, letterSpacing: -1, color: foreground)),
             const SizedBox(height: 8),
-            const Text('Ideas into incredible creations', style: TextStyle(color: secondaryText, fontSize: 13)),
+            Text('Ideas into incredible creations', style: TextStyle(color: secondaryText, fontSize: 13)),
             const SizedBox(height: 42),
-            const Text('VERSION 1.0.0', style: TextStyle(color: faintText, fontSize: 10, letterSpacing: 2)),
+            Text('VERSION 1.0.0', style: TextStyle(color: faintText, fontSize: 10, letterSpacing: 2)),
           ]),
         ),
       )),
@@ -263,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(title, style: TextStyle(fontSize: 25, fontWeight: FontWeight.w900, letterSpacing: -.8, color: foreground)),
       const SizedBox(height: 5),
-      Text(sub, style: const TextStyle(color: mutedText, fontSize: 12)),
+      Text(sub, style: TextStyle(color: mutedText, fontSize: 12)),
     ]),
   );
 
@@ -460,7 +460,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(width: 13),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('PromptGo', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: foreground)),
-          const Text('Ideas into incredible creations', style: TextStyle(color: mutedText, fontSize: 10)),
+          Text('Ideas into incredible creations', style: TextStyle(color: mutedText, fontSize: 10)),
         ]),
       ])),
       const Divider(color: Colors.white10),
