@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:flutter/material.dart';\nimport 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -48,7 +49,12 @@ class _PromptGoAppState extends State<PromptGoApp> {
     final prefs = await SharedPreferences.getInstance();
     if (mounted) setState(() { appDarkMode = prefs.getBool('promptgo_dark_mode') ?? true; appLanguageCode = prefs.getString('promptgo_language') ?? 'en'; });
   }
-  Future<void> _selectLanguage(String code) async {\n    appLanguageCode = code;\n    final prefs = await SharedPreferences.getInstance();\n    await prefs.setString('promptgo_language', code);\n    if (mounted) setState(() {});\n  }\n  Future<void> _toggleTheme() async {
+  Future<void> _selectLanguage(String code) async {
+    appLanguageCode = code;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('promptgo_language', code);
+    if (mounted) setState(() {});
+  }\n  Future<void> _toggleTheme() async {
     setState(() => appDarkMode = !appDarkMode);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('promptgo_dark_mode', appDarkMode);
@@ -70,7 +76,14 @@ class _PromptGoAppState extends State<PromptGoApp> {
       debugShowCheckedModeBanner: false,
       title: 'PromptGo',
       theme: theme,
-      home: SplashScreen(onToggleTheme: _toggleTheme),
+      locale: Locale(appLanguageCode),
+      supportedLocales: const [Locale('en'), Locale('ps'), Locale('fa'), Locale('ar'), Locale('ur'), Locale('hi'), Locale('tr'), Locale('zh'), Locale('es'), Locale('fr')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      builder: (context, child) => Directionality(
+        textDirection: appIsRtl ? TextDirection.rtl : TextDirection.ltr,
+        child: child ?? const SizedBox.shrink(),
+      ),
+      home: SplashScreen(onToggleTheme: _toggleTheme, onSelectLanguage: _selectLanguage),
     );
   }
 }
@@ -96,7 +109,8 @@ class PromptCategory {
 
 class SplashScreen extends StatefulWidget {
   final Future<void> Function() onToggleTheme;
-  const SplashScreen({super.key, required this.onToggleTheme});
+  final Future<void> Function(String) onSelectLanguage;
+  const SplashScreen({super.key, required this.onToggleTheme, required this.onSelectLanguage});
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
@@ -150,7 +164,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
 class HomeScreen extends StatefulWidget {
   final Future<void> Function() onToggleTheme;
-  const HomeScreen({super.key, required this.onToggleTheme});
+  final Future<void> Function(String) onSelectLanguage;
+  const HomeScreen({super.key, required this.onToggleTheme, required this.onSelectLanguage});
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -474,7 +489,10 @@ class _HomeScreenState extends State<HomeScreen> {
       drawerItem(Icons.home_rounded, tr('home'), () { setState(() => tab = 0); Navigator.pop(context); }),
       drawerItem(Icons.favorite_rounded, tr('favorites'), () { setState(() => tab = 1); Navigator.pop(context); }),
       drawerItem(Icons.category_rounded, tr('categories'), () { Navigator.pop(context); setState(() => tab = 0); }),
-      drawerItem(Icons.settings_rounded, tr('settings'), () {\n        Navigator.pop(context);\n        Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen(onToggleTheme: widget.onToggleTheme, onSelectLanguage: widget.onSelectLanguage)));\n      }),\n      SwitchListTile(
+      drawerItem(Icons.settings_rounded, tr('settings'), () {
+        Navigator.pop(context);
+        Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen(onToggleTheme: widget.onToggleTheme, onSelectLanguage: widget.onSelectLanguage)));
+      }),\n      SwitchListTile(
         secondary: Icon(appDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded, color: violet),
         title: Text(appDarkMode ? tr('dark') : tr('light'), style: TextStyle(color: foreground, fontSize: 13, fontWeight: FontWeight.w600)),
         subtitle: Text(tr('switchAppearance'), style: TextStyle(color: mutedText, fontSize: 11)),
