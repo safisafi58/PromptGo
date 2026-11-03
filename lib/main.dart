@@ -141,18 +141,27 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> load() async {
     setState(() => loading = true);
     try {
-      final data = await Future.wait([
-        db.from('prompts').select('id,category_id,title,image_url,prompt_text,is_featured,created_at').order('created_at', ascending: false),
-        db.from('categories').select('id,name,sort_order').order('sort_order').order('name'),
-        SharedPreferences.getInstance(),
-      ]);
-      if (!mounted) return;
-      setState(() {
-        prompts = (data[0] as List).map((e) => Prompt.fromMap(Map<String,dynamic>.from(e))).toList();
-        categories = (data[1] as List).map((e) => PromptCategory.fromMap(Map<String,dynamic>.from(e))).toList();
-        favorites = ((data[2] as SharedPreferences).getStringList('promptgo_favorites') ?? []).toSet();
-        loading = false;
-      });
+      final promptRows = await db
+        .from('prompts')
+        .select('id,category_id,title,image_url,prompt_text,is_featured,created_at')
+        .order('created_at', ascending: false);
+    final categoryRows = await db
+        .from('categories')
+        .select('id,name,sort_order')
+        .order('sort_order')
+        .order('name');
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      prompts = (promptRows as List)
+          .map((e) => Prompt.fromMap(Map<String, dynamic>.from(e)))
+          .toList();
+      categories = (categoryRows as List)
+          .map((e) => PromptCategory.fromMap(Map<String, dynamic>.from(e)))
+          .toList();
+      favorites = (prefs.getStringList('promptgo_favorites') ?? []).toSet();
+      loading = false;
+    });
     } catch (_) { if (mounted) setState(() => loading = false); }
   }
 
